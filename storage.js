@@ -81,6 +81,7 @@ var dal = {
             });
         });
     },
+
     insertContent: function (content, callback) {
         this.connect(null, function (db) {
             db.collection('contents').insert(content, function (err, result) {
@@ -91,15 +92,24 @@ var dal = {
         });
     },
 
-    getDrones: function () {
-
+    getDrones: function (drones) {
+        var allDrones;
         this.connect(null, function (db) {
-
-            var allDrones = db.collection('drones');
-            console.log(allDrones);
-            db.close();
+            db.collection('drones').find({}).toArray(function(err,doc){
+                //callback(doc);
+                allDrones = doc;
+                console.log(allDrones);
+                db.close();
+            });
         });
     }
 };
 
 module.exports = dal;
+
+/*
+col.find({a:1}).limit(2).toArray(function(err, docs) {
+    assert.equal(null, err);
+    assert.equal(2, docs.length);
+    db.close();
+*/
