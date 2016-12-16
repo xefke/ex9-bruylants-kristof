@@ -59,6 +59,8 @@ var Content = function (contentid, macaddress, contentdate, rssi, fileref) {
 //dal.clearContent(); // to delete the collection of contents
 
 dal.getDrones();
+dal.getDroneByID('5a92f5f3cdbc4ec580f0fde904713898');
+
 
 // FOR TESTING PURPOSES ONLY !!!!
 // ==============================

@@ -93,13 +93,20 @@ var dal = {
     },
 
     getDrones: function (drones) {
-        var allDrones;
         this.connect(null, function (db) {
             db.collection('drones').find({}).toArray(function(err,doc){
-                //callback(doc);
-                allDrones = doc;
-                console.log(allDrones);
+                drones = doc;
                 db.close();
+                //console.log(drones);
+            });
+        });
+    },
+    getDroneByID: function (id, drone) {
+        this.connect(null, function (db) {
+            db.collection('drones').find({_id:id}).toArray(function(err,doc){
+                drone = doc;
+                db.close();
+                console.log(drone);
             });
         });
     }
