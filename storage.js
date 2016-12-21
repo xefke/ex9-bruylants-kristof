@@ -18,6 +18,8 @@ var dal = {
             result(db)
         });
     },
+
+    // Used in ingest.js //
     clearDrone: function (call) {
         this.connect(null, function (db) {
             db.collection('drones').drop(function (err, result) {
@@ -91,64 +93,58 @@ var dal = {
         });
     },
 
-    getDrones: function (drones) {
+    // Used in distribute.js //
+    getDrones: function (dronesCallback) {
         this.connect(null, function (db) {
-            db.collection('drones').find({}).toArray(function(err,doc){
+            db.collection('drones').find({}).toArray(function (err, doc) {
                 drones = doc;
                 db.close();
                 //console.log(drones);
-                return drones;
+                dronesCallback(drones);
             });
-            return drones;
         });
-        return drones;
     },
-    getDroneByID: function (id, drone) {
+    getDroneByID: function (droneCallback, id) {
         this.connect(null, function (db) {
-            db.collection('drones').find({_id:id}).toArray(function(err,doc){
+            db.collection('drones').find({_id: id}).toArray(function (err, doc) {
                 drone = doc;
                 db.close();
-                console.log(drone);
-                return drone;
+                //console.log(drone);
+                droneCallback(drone);
             });
         });
     },
-    getSensors: function (drones) {
+    getSensors: function (sensorsCallback) {
         this.connect(null, function (db) {
-            db.collection('sensors').find({}).toArray(function(err,doc){
+            db.collection('sensors').find({}).toArray(function (err, doc) {
                 sensors = doc;
                 db.close();
                 //console.log(sensors);
+                sensorsCallback(sensors);
             });
         });
     },
-    getSensorsByDroneID: function (id, sensors) {
+    getSensorsByDroneID: function (droneSensorsCallback, id) {
         this.connect(null, function (db) {
-            db.collection('sensors').find({droneid:id}).toArray(function(err,doc){
+            db.collection('sensors').find({droneid: id}).toArray(function (err, doc) {
                 sensors = doc;
                 db.close();
-                console.log(sensors);
+                //console.log(sensors);
+                droneSensorsCallback(sensors);
             });
         });
     },
-    getSensorsByID: function (id, sensor) {
+    getSensorsByID: function (sensorCallback, id) {
         this.connect(null, function (db) {
-            db.collection('sensors').find({_id:id}).toArray(function(err,doc){
+            db.collection('sensors').find({_id: id}).toArray(function (err, doc) {
                 sensor = doc;
                 db.close();
-                console.log(sensor);
-            });
-        });
-    },
-    addSensor: function (sensor, callback) {
-        this.connect(null, function (db) {
-            db.collection('sensors').insert(sensor, function (err, result) {
-                //callback(result);
-                console.log('- Sensor Inserted');
-                db.close();
+                //console.log(sensor);
+                sensorCallback(sensor);
             });
         });
     }
+
 };
 
 module.exports = dal;
