@@ -81,7 +81,6 @@ var dal = {
             });
         });
     },
-
     insertContent: function (content, callback) {
         this.connect(null, function (db) {
             db.collection('contents').insert(content, function (err, result) {
@@ -98,8 +97,11 @@ var dal = {
                 drones = doc;
                 db.close();
                 //console.log(drones);
+                return drones;
             });
+            return drones;
         });
+        return drones;
     },
     getDroneByID: function (id, drone) {
         this.connect(null, function (db) {
@@ -107,6 +109,43 @@ var dal = {
                 drone = doc;
                 db.close();
                 console.log(drone);
+                return drone;
+            });
+        });
+    },
+    getSensors: function (drones) {
+        this.connect(null, function (db) {
+            db.collection('sensors').find({}).toArray(function(err,doc){
+                sensors = doc;
+                db.close();
+                //console.log(sensors);
+            });
+        });
+    },
+    getSensorsByDroneID: function (id, sensors) {
+        this.connect(null, function (db) {
+            db.collection('sensors').find({droneid:id}).toArray(function(err,doc){
+                sensors = doc;
+                db.close();
+                console.log(sensors);
+            });
+        });
+    },
+    getSensorsByID: function (id, sensor) {
+        this.connect(null, function (db) {
+            db.collection('sensors').find({_id:id}).toArray(function(err,doc){
+                sensor = doc;
+                db.close();
+                console.log(sensor);
+            });
+        });
+    },
+    addSensor: function (sensor, callback) {
+        this.connect(null, function (db) {
+            db.collection('sensors').insert(sensor, function (err, result) {
+                //callback(result);
+                console.log('- Sensor Inserted');
+                db.close();
             });
         });
     }
@@ -115,8 +154,15 @@ var dal = {
 module.exports = dal;
 
 /*
+
 col.find({a:1}).limit(2).toArray(function(err, docs) {
     assert.equal(null, err);
     assert.equal(2, docs.length);
     db.close();
+
+
+ col.deleteOne({a:1}, function(err, r) {
+ assert.equal(null, err);
+ assert.equal(1, r.deletedCount);
+
 */
