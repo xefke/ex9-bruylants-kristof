@@ -9,6 +9,9 @@ var parser = require('body-parser');
 // load database
 var dal = require("./storage");
 
+// load validation
+var val = require("./validate");
+
 // create webservice
 var app = express();
 app.use(parser.json());
@@ -21,6 +24,14 @@ app.use(parser.json());
 
 //-------------------------------------------------------------------------------------------------------------------//
 // 01 // == DRONES == ////
+// construct to add new drone
+var newDrone = function (id, name, mac, location) {
+    this._id = id;
+    this.name = name;
+    this.mac = mac;
+    this.location = location;
+};
+
 // GET requests on /drones
 app.get("/drones", function (request, response) {
     dal.getDrones(function (drones) {
@@ -35,6 +46,19 @@ app.get("/drones/:id", function (request, response) {
     }, request.params.id.toString());
 });
 
+// POST request on /drones to add new drone
+app.post("/drones", function (request, response) {
+    var drone = request.body;
+    console.log(drone);
+
+/*    var errors = val.fieldsNotEmpty("id", "name", "mac", "location");
+    if (errors){
+        response.status(400).send({msg:"Following field(s) are mandatory:"+errors.concat()});
+        return;
+    }*/
+    dal.insertDrone(new newDrone(drone.id, drone.name, drone.mac_address, drone.location));
+    response.send("Drone with id "+drone.id+" inserted.");
+});
 //-------------------------------------------------------------------------------------------------------------------//
 // 02 // == SENSORS == ////
 // GET requests on /sensors
@@ -58,6 +82,7 @@ app.get("/drones/:id/sensors", function (request, response) {
     }, request.params.id.toString());
 });
 
+//-------------------------------------------------------------------------------------------------------------------//
 // 03 // == BUILDINGS == ///
 // GET requests on /buildings
 app.get("/buildings", function (request, response) {
