@@ -54,14 +54,14 @@ app.post("/drones", function (request, response) {
     var now = new Date();
     var postDateTime = now.toISOString()
 
-    console.log(drone);
-/*
-    var errors = val.fieldsNotEmpty("id", "name", "mac", "location");
+    //console.log(drone);
+
+    var errors = val.fieldsNotEmpty(drone,"id", "name", "mac_address", "location");
     if (errors){
         response.status(400).send({msg:"Following field(s) are mandatory:"+errors.concat()});
         return;
     }
-*/
+
     //insert the drone in the database and send response
     dal.insertDrone(new newDrone(drone.id, drone.name, drone.mac_address, drone.location, postDateTime, postDateTime));
     response.send("Drone with id "+drone.id+" inserted.");
