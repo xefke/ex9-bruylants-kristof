@@ -4,12 +4,10 @@
 //load dependencies
 var express = require('express');
 var parser = require('body-parser');
-//var shortid = require('shortid');
+var shortid = require('shortid'); // $npm install shortid --save
 
-// load database
+// load external sources (datastore and validation)
 var dal = require("./storage");
-
-// load validation
 var val = require("./validate");
 
 // create webservice
@@ -87,12 +85,13 @@ app.post("/drones", function (request, response) {
         }
     }, drone.id);
 
-
-
     //insert the drone in the database and send response
     //dal.insertDrone(new newDrone(drone.id, drone.name, drone.mac_address, drone.location, postDateTime, postDateTime));
     //response.send("Drone with id "+drone.id+" inserted.");
 });
+
+
+
 //-------------------------------------------------------------------------------------------------------------------//
 // 02 // == SENSORS == ////
 // GET requests on /sensors
@@ -104,7 +103,7 @@ app.get("/sensors", function (request, response) {
 
 // GET requests on /sensor with ID => /sensors/:id
 app.get("/sensors/:id", function (request, response) {
-    dal.getSensorsByID(function (sensor){
+    dal.getSensorByID(function (sensor){
         response.send(sensor);
     }, request.params.id.toString());
 });
@@ -118,6 +117,17 @@ app.get("/drones/:id/sensors", function (request, response) {
 
 //-------------------------------------------------------------------------------------------------------------------//
 // 03 // == BUILDINGS == ///
+// Construct for new buildings
+var newBuilding = function (id, name, city, longitude, latitude, created, updated) {
+    this._id = id;
+    this.name = name;
+    this.city = city;
+    this.longitude = longitude;
+    this.latitude = latitude
+    this.created = created;
+    this.updated = updated;
+};
+
 // GET requests on /buildings
 app.get("/buildings", function (request, response) {
     dal.getBuildings(function (buildings) {
@@ -125,22 +135,78 @@ app.get("/buildings", function (request, response) {
     })
 });
 
+// POST request on /buildings to add new building
+app.post("/buildings", function (request, response) {
+    var building = request.body;
+    var now = new Date();
+    var postDateTime = now.toISOString()
 
 
-/*
+    // validate that no fields are empty
+    var errors = val.fieldsNotEmpty(building, "name", "city");
+    if (errors){
+        response.status(400).send({msg:"Following field(s) are mandatory:"+errors.concat()});
+        return;
+    };
 
-// 01 // == MEASUREMENTS == ////
-// GET requests on /measurements
-app.get("/measurements", function (request, response) {
-    response.send(database.allMeasurements());
+    // validate for non-existing building name
+    dal.getBuildingByName(function(returnNAMEbuilding){
+        console.log('ID: '+returnNAMEbuilding.length);
+
+        if (returnNAMEbuilding.length == 0) {
+            var buildingID = shortid.generate(); //generate the unique ID
+            dal.insertBuilding(new newBuilding(buildingID, building.name, building.city, building.longitude, building.latitude, postDateTime, postDateTime));
+            response.send({msg:"Building "+building.name+" with id "+buildingID+" inserted.", link:"../buildings/"+buildingID});
+
+        } else {
+            response.status(409).send({msg:"The building with name '"+building.name+"' is already registered", link:"../buildings/"+returnNAMEbuilding[0]._id});
+        }
+
+    }, building.name);
 });
 
+// PUT request on /buildings/:id to update a building
+app.put("/buildings/:id", function (request, response) {
+    var now = new Date();
+    var putDateTime = now.toISOString();
+    var buildingUpdate = request.body;
+    buildingUpdate.updated = putDateTime
+    console.log(buildingUpdate);
 
-// GET requests on /measurements with ID => /measurements/:id
 
+    dal.updateBuilding(request.params.id.toString(), buildingUpdate, putDateTime);
+    response.send("test complete")
+    /*
+    // validate that no fields are empty
+    var errors = val.fieldsNotEmpty(building, "name", "city");
+    if (errors){
+        response.status(400).send({msg:"Following field(s) are mandatory:"+errors.concat()});
+        return;
+    };
 
-*/
+    // validate for non-existing building name
+    dal.getBuildingByName(function(returnNAMEbuilding){
+        console.log('ID: '+returnNAMEbuilding.length);
 
+        if (returnNAMEbuilding.length == 0) {
+            var buildingID = shortid.generate(); //generate the unique ID
+            dal.insertBuilding(new newBuilding(buildingID, building.name, building.city, building.longitude, building.latitude, postDateTime, postDateTime));
+            response.send({msg:"Building "+building.name+" with id "+buildingID+" inserted.", link:"../buildings/"+buildingID});
+
+        } else {
+            response.status(409).send({msg:"The building with name '"+building.name+"' is already registered", link:"../buildings/"+returnNAMEbuilding[0]._id});
+        }
+
+    }, building.name);
+    */
+});
+
+//-------------------------------------------------------------------------------------------------------------------//
+//-------------------------------------------------------------------------------------------------------------------//
 
 app.listen(4567);
 console.log("server is running");
+
+//-------------------------------------------------------------------------------------------------------------------//
+//-------------------------------------------------------------------------------------------------------------------//
+//-------------------------------------------------------------------------------------------------------------------//

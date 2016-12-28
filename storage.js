@@ -149,7 +149,7 @@ db : null,
             });
         });
     },
-    getSensorsByID: function (sensorCallback, id) {
+    getSensorByID: function (sensorCallback, id) {
         this.connect(null, function (db) {
             db.collection('sensors').find({_id: id}).toArray(function (err, doc) {
                 sensor = doc;
@@ -161,15 +161,43 @@ db : null,
     },
 
     // 03 Buildings //
-    getBuildings: function (sensorsCallback) {
+    insertBuilding: function (building, callback) {
         this.connect(null, function (db) {
-            db.collection('sensors').find({}).toArray(function (err, doc) {
-                sensors = doc;
+            db.collection('buildings').insert(building, function (err, result) {
+                //callback(result);
+                console.log('Building Inserted');
                 db.close();
-                //console.log(sensors);
-                sensorsCallback(sensors);
             });
         });
+    },
+    getBuildings: function (buildingsCallback) {
+        this.connect(null, function (db) {
+            db.collection('buildings').find({}).toArray(function (err, doc) {
+                buildings = doc;
+                db.close();
+                //console.log(sensors);
+                buildingsCallback(buildings);
+            });
+        });
+    },
+    getBuildingByName: function (buildingCallback, name) {
+        this.connect(null, function (db) {
+            db.collection('buildings').find({name: name}).toArray(function (err, doc) {
+                building = doc;
+                db.close();
+                //console.log(sensor);
+                buildingCallback(building);
+            });
+        });
+    },
+    updateBuilding: function (id, update, datetime) {
+        this.connect(null, function (db) {
+            db.collection('buildings').update(
+                // query
+                {_id : id},
+                { $set : update}
+            );
+        })
     }
 
 };
