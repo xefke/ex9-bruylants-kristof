@@ -56,15 +56,32 @@ app.post("/drones", function (request, response) {
 
     //console.log(drone);
 
+    // validate that no fields are empty
     var errors = val.fieldsNotEmpty(drone,"id", "name", "mac_address", "location");
     if (errors){
         response.status(400).send({msg:"Following field(s) are mandatory:"+errors.concat()});
         return;
-    }
+    };
+
+    /// validate for non-existing drone ID
+    dal.getDroneByID(function(returndrone){
+        //console.log(returndrone.length);
+
+        if (returndrone.length == 0) {
+            //insert the drone in the database and send response
+            dal.insertDrone(new newDrone(drone.id, drone.name, drone.mac_address, drone.location, postDateTime, postDateTime));
+            response.send("Drone with id "+drone.id+" inserted.");
+
+        } else {
+            var droneID = returndrone[0]._id
+            response.status(409).send({msg:"The drone ID is already registered", link:"../drones/"+droneID});
+        }
+
+    }, drone.id);
 
     //insert the drone in the database and send response
-    dal.insertDrone(new newDrone(drone.id, drone.name, drone.mac_address, drone.location, postDateTime, postDateTime));
-    response.send("Drone with id "+drone.id+" inserted.");
+    //dal.insertDrone(new newDrone(drone.id, drone.name, drone.mac_address, drone.location, postDateTime, postDateTime));
+    //response.send("Drone with id "+drone.id+" inserted.");
 });
 //-------------------------------------------------------------------------------------------------------------------//
 // 02 // == SENSORS == ////
