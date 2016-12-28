@@ -9,12 +9,14 @@ var url = 'mongodb://localhost:27017/prober';
 // mongo API : http://mongodb.github.io/node-mongodb-native/2.2/api/Collection.html
 
 var dal = {
+db : null,
 
     connect: function (err, result) {
         MongoClient.connect(url, function (error, db) {
             if (error)
                 throw new Error(error);
             //console.log("Connected successfully to server");
+            this.db = db;
             result(db)
         });
     },
@@ -94,6 +96,7 @@ var dal = {
     },
 
     // Used in distribute.js //
+    // 01 Drones //
     getDrones: function (dronesCallback) {
         this.connect(null, function (db) {
             db.collection('drones').find({}).toArray(function (err, doc) {
@@ -114,6 +117,8 @@ var dal = {
             });
         });
     },
+
+    // 02 Sensors //
     getSensors: function (sensorsCallback) {
         this.connect(null, function (db) {
             db.collection('sensors').find({}).toArray(function (err, doc) {
@@ -141,6 +146,18 @@ var dal = {
                 db.close();
                 //console.log(sensor);
                 sensorCallback(sensor);
+            });
+        });
+    },
+
+    // 03 Buildings //
+    getBuildings: function (sensorsCallback) {
+        this.connect(null, function (db) {
+            db.collection('sensors').find({}).toArray(function (err, doc) {
+                sensors = doc;
+                db.close();
+                //console.log(sensors);
+                sensorsCallback(sensors);
             });
         });
     }

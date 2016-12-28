@@ -28,6 +28,7 @@ app.get("/drones", function (request, response) {
     })
 });
 
+// GET requests on /drones with ID => /drones/:id
 app.get("/drones/:id", function (request, response) {
     dal.getDroneByID(function (drone){
         response.send(drone);
@@ -57,7 +58,13 @@ app.get("/drones/:id/sensors", function (request, response) {
     }, request.params.id.toString());
 });
 
-// 02 // ==
+// 03 // == BUILDINGS == ///
+// GET requests on /buildings
+app.get("/buildings", function (request, response) {
+    dal.getBuildings(function (buildings) {
+        response.send(buildings);
+    })
+});
 
 
 

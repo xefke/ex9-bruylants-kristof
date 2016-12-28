@@ -9,7 +9,7 @@ var dal = require('./storage');
 // http://stackoverflow.com/questions/10888610/ignore-invalid-self-signed-ssl-certificate-in-node-js-with-https-request
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
-
+// create a base construct for connecting, includes the login credentials
 var BASE_URL = "https://web-ims.thomasmore.be/datadistribution/API/2.0";
 var Settings = function (url) {
     this.url = BASE_URL + url;
@@ -28,12 +28,10 @@ var Drone = function (id, name, mac, location) {
     this.mac = mac;
     this.location = location;
 };
-
 var FileHeader = function (fileid, droneref) {
     this._id = fileid;
     this.droneref = droneref;
 };
-
 var File = function (fileid, dateLoaded, first_rec, last_rec, droneid, records) {
     this._id = fileid;
     this.date_loaded = dateLoaded;
@@ -42,7 +40,6 @@ var File = function (fileid, dateLoaded, first_rec, last_rec, droneid, records) 
     this.drone_ref = droneid
     this.contents_count = records;
 };
-
 var Content = function (contentid, macaddress, contentdate, rssi, fileref) {
     this._id = contentid;
     this.mac_address = macaddress;
@@ -58,8 +55,8 @@ var Content = function (contentid, macaddress, contentdate, rssi, fileref) {
 //dal.clearFile(); // to delete the collection of files
 //dal.clearContent(); // to delete the collection of contents
 
-dal.getDrones();
-dal.getDroneByID('5a92f5f3cdbc4ec580f0fde904713898');
+//dal.getDrones();
+//dal.getDroneByID('5a92f5f3cdbc4ec580f0fde904713898');
 
 
 // FOR TESTING PURPOSES ONLY !!!!
@@ -68,8 +65,6 @@ dal.getDroneByID('5a92f5f3cdbc4ec580f0fde904713898');
 //var fixedDroneID = '68543c10992f465e927b21c25675263b';
 //var fixedFileID = '022e728cbe434e2db6444481bc8f7754';
 
-
-/*
 
 // 1 - GET THE LIST OF DRONES
 var dronesSettings = new Settings("/drones?format=json"); // build the necessairy URL
@@ -92,7 +87,7 @@ request(dronesSettings, function (error, response, dronesString) { // call 1: Li
             //console.log('Drone | ID: '+drone.id+' Name: '+drone.name+' MAC: '+drone.mac_address+' Location: '+drone.location);
 
             // 4 - GET THE LIST OF FILES FOR EACH DRONE
-            var filesHeaderSettings = new Settings("/files?drone_id.is=" + drone.id + "&format=json");
+            var filesHeaderSettings = new Settings("/files?drone_id.is=" + drone.id + "&format=json&date_loaded.greaterOrEqual=2016-12-27"); // filtered on a few days
             //var filesHeaderSettings = new Settings("/files?drone_id.is=" + fixedDroneID + "&format=json");
             request(filesHeaderSettings, function (error, response, fileheadersString) { // call 3: list all file headers for all drones
                 var fileHeaders = JSON.parse(fileheadersString);
@@ -107,6 +102,7 @@ request(dronesSettings, function (error, response, dronesString) { // call 1: Li
                     var fileSettings = new Settings("/files/"+file.id+"?format=json");
                     //var fileSettings = new Settings("/files/"+fixedFileID+"?format=json");
                     request(fileSettings, function (error, response, fileString) { // call 4: details for all files + write to db
+                        try{ //error start for files
                         var file = JSON.parse(fileString);
                         //console.log('file ID:'+file.id+ ' drone ref.: '+ file.ref+' contents: '+file.contents_count);
                         dal.insertFile(new File(file.id, file.date_loaded, file.date_first_record, file.date_last_record, file.ref, file.contents_count));
@@ -116,6 +112,7 @@ request(dronesSettings, function (error, response, dronesString) { // call 1: Li
                         var contentHeadersSettings = new Settings("/files/"+file.id+"/contents?format=json");
                         //var contentHeadersSettings = new Settings("/files/"+fixedFileID+"/contents?format=json");
                         request(contentHeadersSettings, function (error, response, contentheadersString) { // call 5: list all content headers for all files
+                            try{
                             var contentHeaders = JSON.parse(contentheadersString);
                             //console.log(contentHeaders[1].id);
 
@@ -126,14 +123,17 @@ request(dronesSettings, function (error, response, dronesString) { // call 1: Li
                                 var contentSettings = new Settings("/files/"+file.id+"/contents/"+content.id+"?format=json");
                                 //var contentSettings = new Settings("/files/"+fixedFileID+"/contents/"+content.id+"?format=json");
                                 request(contentSettings, function(error, response, contentString) {
+                                    try { //error start for contents
                                     var content = JSON.parse(contentString);
                                     //console.log('id: '+content.id+' RSSI: '+content.rssi);
                                     dal.insertContent(new Content(content.id, content.mac_address, content.datetime, content.rssi, content.ref));
                                     console.log('Content | ID: '+content.id+' MAC: '+content.mac_address+' Date Loaded: '+content.datetime+' RSSI: '+content.rssi+' Ref.: '+content.ref);
-
+                                    } catch (error) {console.log(error);} // error catch for content details
                                 }); // end content details request
                             }); // end content header forEach
+                            } catch (error) {console.log(error);} // error catch for content headers
                         }); // end content header request
+                        } catch (error) {console.log(error);} // error catch for file details
                     }); // end file detail request
                 }); // end file headers forEach
             }); // end file headers request
@@ -141,4 +141,3 @@ request(dronesSettings, function (error, response, dronesString) { // call 1: Li
     }); // end drones forEach
 }); // end drones request
 
-*/
