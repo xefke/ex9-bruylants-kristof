@@ -25,11 +25,13 @@ app.use(parser.json());
 //-------------------------------------------------------------------------------------------------------------------//
 // 01 // == DRONES == ////
 // construct to add new drone
-var newDrone = function (id, name, mac, location) {
+var newDrone = function (id, name, mac, location, created, updated) {
     this._id = id;
     this.name = name;
     this.mac = mac;
     this.location = location;
+    this.created = created;
+    this.updated = updated;
 };
 
 // GET requests on /drones
@@ -49,14 +51,19 @@ app.get("/drones/:id", function (request, response) {
 // POST request on /drones to add new drone
 app.post("/drones", function (request, response) {
     var drone = request.body;
-    console.log(drone);
+    var now = new Date();
+    var postDateTime = now.toISOString()
 
-/*    var errors = val.fieldsNotEmpty("id", "name", "mac", "location");
+    console.log(drone);
+/*
+    var errors = val.fieldsNotEmpty("id", "name", "mac", "location");
     if (errors){
         response.status(400).send({msg:"Following field(s) are mandatory:"+errors.concat()});
         return;
-    }*/
-    dal.insertDrone(new newDrone(drone.id, drone.name, drone.mac_address, drone.location));
+    }
+*/
+    //insert the drone in the database and send response
+    dal.insertDrone(new newDrone(drone.id, drone.name, drone.mac_address, drone.location, postDateTime, postDateTime));
     response.send("Drone with id "+drone.id+" inserted.");
 });
 //-------------------------------------------------------------------------------------------------------------------//
