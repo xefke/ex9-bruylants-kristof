@@ -117,6 +117,16 @@ db : null,
             });
         });
     },
+    getDroneByMac: function (droneCallback, mac) {
+        this.connect(null, function (db) {
+            db.collection('drones').find({mac: mac}).toArray(function (err, doc) {
+                drone = doc;
+                db.close();
+                //console.log(drone);
+                droneCallback(drone);
+            });
+        });
+    },
 
     // 02 Sensors //
     getSensors: function (sensorsCallback) {

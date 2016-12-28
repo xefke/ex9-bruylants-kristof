@@ -63,21 +63,31 @@ app.post("/drones", function (request, response) {
         return;
     };
 
-    /// validate for non-existing drone ID
-    dal.getDroneByID(function(returndrone){
-        //console.log(returndrone.length);
+    // validate for non-existing drone ID and drone MAC address
+    dal.getDroneByID(function(returnIDdrone){
+        console.log('ID: '+returnIDdrone.length);
 
-        if (returndrone.length == 0) {
-            //insert the drone in the database and send response
-            dal.insertDrone(new newDrone(drone.id, drone.name, drone.mac_address, drone.location, postDateTime, postDateTime));
-            response.send("Drone with id "+drone.id+" inserted.");
+        if (returnIDdrone.length == 0) {
+            dal.getDroneByMac(function(returnMACdrone){
+                console.log('mac: '+returnMACdrone.length)
+
+                if (returnMACdrone.length == 0) {
+                    //insert the drone in the database and send response
+                    dal.insertDrone(new newDrone(drone.id, drone.name, drone.mac_address, drone.location, postDateTime, postDateTime));
+                    response.send("Drone with id "+drone.id+" inserted.");
+
+                } else {
+                    response.status(409).send({msg:"The drone MAC address is already registered", link:"../drones/"+returnMACdrone[0]._id});
+                }
+            }, drone.mac_address);
 
         } else {
-            var droneID = returndrone[0]._id
-            response.status(409).send({msg:"The drone ID is already registered", link:"../drones/"+droneID});
+            response.status(409).send({msg:"The drone ID is already registered"});
+            //response.status(409).send({msg:"The drone ID is already registered", link:"../drones/"+returnIDdrone[0]._id});
         }
-
     }, drone.id);
+
+
 
     //insert the drone in the database and send response
     //dal.insertDrone(new newDrone(drone.id, drone.name, drone.mac_address, drone.location, postDateTime, postDateTime));
