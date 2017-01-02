@@ -1,6 +1,7 @@
 /**
  * Created by Xefke on 16/12/2016.
  */
+
 //load dependencies
 var express = require('express');
 var parser = require('body-parser');
@@ -20,8 +21,8 @@ app.use(parser.json());
 String.prototype.ucfirst = function() {
     return this.charAt(0).toUpperCase() + this.substr(1).toLowerCase();
 };
-// e.g.: brUYlaNTs as input would correctly be entered as Bruylants as demonstrated in the below console.log
-//console.log("brUYlaNTs".ucfirst());
+// e.g.: brUYlaNTs as input would correctly be reformatted as Bruylants as demonstrated in the below console.log
+//console.log("brUYlaNTs".ucfirst()); // result = Bruylants
 
 
 //-------------------------------------------------------------------------------------------------------------------//

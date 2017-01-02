@@ -1,6 +1,7 @@
 /**
  * Created by Xefke on 14/12/2016.
  */
+
 //npm install mongodb --save
 var MongoClient = require('mongodb').MongoClient;
 
@@ -9,8 +10,7 @@ var url = 'mongodb://localhost:27017/prober';
 // mongo API : http://mongodb.github.io/node-mongodb-native/2.2/api/Collection.html
 
 var dal = {
-db : null,
-
+    db : null,
     connect: function (err, result) {
         MongoClient.connect(url, function (error, db) {
             if (error)

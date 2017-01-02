@@ -1,6 +1,7 @@
 /**
  * Created by Xefke on 28/12/2016.
  */
+
 module.exports = {
 
     fieldsNotEmpty: function (object) {

@@ -22,11 +22,13 @@ var Settings = function (url) {
 
 // Constructs for writing to DB in correct format
 // ==============================================
-var Drone = function (id, name, mac, location) {
+var Drone = function (id, name, mac, location, created, updated) {
     this._id = id;
     this.name = name;
     this.mac = mac;
     this.location = location;
+    this.created = created;
+    this.updated = updated;
 };
 var FileHeader = function (fileid, droneref) {
     this._id = fileid;
@@ -65,7 +67,6 @@ var Content = function (contentid, macaddress, contentdate, rssi, fileref) {
 //var fixedDroneID = '68543c10992f465e927b21c25675263b';
 //var fixedFileID = '022e728cbe434e2db6444481bc8f7754';
 
-
 // 1 - GET THE LIST OF DRONES
 var dronesSettings = new Settings("/drones?format=json"); // build the necessairy URL
 request(dronesSettings, function (error, response, dronesString) { // call 1: List all drones
@@ -83,9 +84,11 @@ request(dronesSettings, function (error, response, dronesString) { // call 1: Li
         request(droneSettings, function (error, response, droneString) { // call 2: list details for each drone ID of the call 1 list + write to DB
             var drone = JSON.parse(droneString);
             //console.log(drone.id); // since this per drone, drone.id is possible
-            dal.insertDrone(new Drone(drone.id, drone.name, drone.mac_address, drone.location));
+            var now = new Date();
+            var droneDateTime = now.toISOString();
+            dal.insertDrone(new Drone(drone.id, drone.name, drone.mac_address, drone.location, droneDateTime, droneDateTime));
             //console.log('Drone | ID: '+drone.id+' Name: '+drone.name+' MAC: '+drone.mac_address+' Location: '+drone.location);
-
+/*
             // 4 - GET THE LIST OF FILES FOR EACH DRONE
             var filesHeaderSettings = new Settings("/files?drone_id.is=" + drone.id + "&format=json&date_loaded.greaterOrEqual=2016-12-27"); // filtered on a few days
             //var filesHeaderSettings = new Settings("/files?drone_id.is=" + fixedDroneID + "&format=json");
@@ -136,7 +139,7 @@ request(dronesSettings, function (error, response, dronesString) { // call 1: Li
                         } catch (error) {console.log(error);} // error catch for file details
                     }); // end file detail request
                 }); // end file headers forEach
-            }); // end file headers request
+            }); // end file headers request */
         }); // end drone details request
     }); // end drones forEach
 }); // end drones request
