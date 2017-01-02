@@ -88,7 +88,7 @@ request(dronesSettings, function (error, response, dronesString) { // call 1: Li
             var droneDateTime = now.toISOString();
             dal.insertDrone(new Drone(drone.id, drone.name, drone.mac_address, drone.location, droneDateTime, droneDateTime));
             //console.log('Drone | ID: '+drone.id+' Name: '+drone.name+' MAC: '+drone.mac_address+' Location: '+drone.location);
-/*
+
             // 4 - GET THE LIST OF FILES FOR EACH DRONE
             var filesHeaderSettings = new Settings("/files?drone_id.is=" + drone.id + "&format=json&date_loaded.greaterOrEqual=2016-12-27"); // filtered on a few days
             //var filesHeaderSettings = new Settings("/files?drone_id.is=" + fixedDroneID + "&format=json");
@@ -139,7 +139,7 @@ request(dronesSettings, function (error, response, dronesString) { // call 1: Li
                         } catch (error) {console.log(error);} // error catch for file details
                     }); // end file detail request
                 }); // end file headers forEach
-            }); // end file headers request */
+            }); // end file headers request
         }); // end drone details request
     }); // end drones forEach
 }); // end drones request
