@@ -263,20 +263,20 @@ db : null,
             });
         });
     },
-
     updatePeople: function (id, update) {
         this.connect(null, function (db) {
-            db.collection('buildings').update(
+            db.collection('people').update(
                 {_id : id},
                 { $set : update}
             );
         })
     }
 
-
     // 07 Events //
+    // Under Construction
 
     // 08 Measurements //
+    // Under Construction
 
 };
 

@@ -154,7 +154,9 @@ app.post("/buildings", function (request, response) {
 
         if (returnNAMEbuilding.length == 0) {
             var buildingID = shortid.generate(); //generate the unique ID
-            dal.insertBuilding(new newBuilding(buildingID, building.name, building.city, building.longitude, building.latitude, postDateTime, postDateTime));
+            var nameUC = building.name.ucfirst(); // make sure all building name are in the database with first letter capitals
+            var cityUC = building.city.ucfirst(); // make sure all city names are in the database with first letter capitals
+            dal.insertBuilding(new newBuilding(buildingID, nameUC, cityUC, building.longitude, building.latitude, postDateTime, postDateTime));
             response.send({msg:"Building "+building.name+" with id "+buildingID+" inserted.", link:"../buildings/"+buildingID});
 
         } else {
@@ -196,11 +198,6 @@ var newPerson = function (id, lastname, firstname, course, created, updated) {
     this.created = created;
     this.updated = updated;
 };
-
-// Testing the uppercase function
-//var lowercasename = "bruylants";
-//var uppercasename = lowercasename.ucfirst()
-//console.log("test for uppercase: "+uppercasename);
 
 // GET requests on /people
 app.get("/people", function (request, response) {
@@ -257,6 +254,21 @@ app.post("/people", function (request, response) {
     dal.insertPeople(new newPerson(personID, lastnameUC, firstnameUC, person.course, postDateTime, postDateTime));
     response.send({msg:"Person "+person.lastname+" "+person.firstname+" with id "+personID+" inserted.", link:"../people/"+personID});
 
+});
+
+// PUT request on /people/:id to update a person
+app.put("/people/:id", function (request, response) {
+    var now = new Date();
+    var putDateTime = now.toISOString();
+    var personUpdate = request.body;
+    personUpdate.updated = putDateTime;
+    var lastnameUC = personUpdate.lastname.ucfirst(); // make sure updates on lastname happen with capital first letter
+    var firstnameUC = personUpdate.firstname.ucfirst(); // make sure updates on firstname happen with capital first letter
+    personUpdate.lastname = lastnameUC;
+    personUpdate.firstname = firstnameUC;
+
+    dal.updatePeople(request.params.id.toString(), personUpdate);
+    response.send({msg:"Person with ID "+request.params.id.toString()+" updated.", link:"../people/"+request.params.id.toString()});
 });
 
 //-------------------------------------------------------------------------------------------------------------------//
