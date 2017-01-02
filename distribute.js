@@ -16,9 +16,12 @@ app.use(parser.json());
 
 // function in order to capitalise the first letter of a string for search on names.
 // source: http://www.geekality.net/2010/06/30/javascript-uppercase-first-letter-in-a-string/
+// altered the function a small bit to have all but the first letter of a string in small letters as well.
 String.prototype.ucfirst = function() {
-    return this.charAt(0).toUpperCase() + this.substr(1);
+    return this.charAt(0).toUpperCase() + this.substr(1).toLowerCase();
 };
+// e.g.: brUYlaNTs as input would correctly be entered as Bruylants as demonstrated in the below console.log
+//console.log("brUYlaNTs".ucfirst());
 
 
 //-------------------------------------------------------------------------------------------------------------------//
