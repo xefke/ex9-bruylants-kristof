@@ -239,8 +239,7 @@ db : null,
             db.collection('people').find({lastname: lastname}).toArray(function (err, doc) {
                person = doc;
                 db.close();
-                //console.log(sensor);
-                personCallback(person);
+                person.length === 0 ? personCallback("No person with lastname '"+lastname+"' found. Please check your spelling and try again.") : personCallback(person);
             });
         });
     },
@@ -249,8 +248,8 @@ db : null,
             db.collection('people').find({lastname: lastname, firstname: firstname}).toArray(function (err, doc) {
                 person = doc;
                 db.close();
-                //console.log(sensor);
-                personCallback(person);
+                person.length === 0 ? personCallback("No person with lastname '"+lastname+"' and firstname '"+firstname+"' found. Please check your spelling and try again." +
+                    " Alternatively, use ../people/name/"+lastname+" to search on lastname.") : personCallback(person);
             });
         });
     },

@@ -14,9 +14,11 @@ var val = require("./validate");
 var app = express();
 app.use(parser.json());
 
-// TESTING
-//var result = dal.getDrones();
-//console.log(result);
+// function in order to capitalise the first letter of a string for search on names.
+// source: http://www.geekality.net/2010/06/30/javascript-uppercase-first-letter-in-a-string/
+String.prototype.ucfirst = function() {
+    return this.charAt(0).toUpperCase() + this.substr(1);
+};
 
 
 //-------------------------------------------------------------------------------------------------------------------//
@@ -195,12 +197,6 @@ var newPerson = function (id, lastname, firstname, course, created, updated) {
     this.updated = updated;
 };
 
-// function in order to capitalise the first letter of a string for search on names.
-// source: http://www.geekality.net/2010/06/30/javascript-uppercase-first-letter-in-a-string/
-String.prototype.ucfirst = function() {
-    return this.charAt(0).toUpperCase() + this.substr(1);
-};
-
 // Testing the uppercase function
 //var lowercasename = "bruylants";
 //var uppercasename = lowercasename.ucfirst()
@@ -256,7 +252,9 @@ app.post("/people", function (request, response) {
 
     // insert the new person into the databases
     var personID = shortid.generate(); //generate the unique ID
-    dal.insertPeople(new newPerson(personID, person.lastname, person.firstname, person.course, postDateTime, postDateTime));
+    var lastnameUC = person.lastname.ucfirst(); // make sure all lastnames are in the database with first letter capitals
+    var firstnameUC = person.firstname.ucfirst(); // make sure all firstnames are in the database with first letter capitals
+    dal.insertPeople(new newPerson(personID, lastnameUC, firstnameUC, person.course, postDateTime, postDateTime));
     response.send({msg:"Person "+person.lastname+" "+person.firstname+" with id "+personID+" inserted.", link:"../people/"+personID});
 
 });
