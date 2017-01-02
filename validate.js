@@ -10,8 +10,7 @@ module.exports = {
             if (!this.fieldNotEmpty(object, arguments[i])) {
                 errors.push(arguments[i]);
             }
-        }
-        ;
+        };
         return errors.length === 0 ? null : errors;
     },
 

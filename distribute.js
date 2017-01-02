@@ -15,7 +15,6 @@ var app = express();
 app.use(parser.json());
 
 // TESTING
-
 //var result = dal.getDrones();
 //console.log(result);
 
@@ -89,8 +88,6 @@ app.post("/drones", function (request, response) {
     //dal.insertDrone(new newDrone(drone.id, drone.name, drone.mac_address, drone.location, postDateTime, postDateTime));
     //response.send("Drone with id "+drone.id+" inserted.");
 });
-
-
 
 //-------------------------------------------------------------------------------------------------------------------//
 // 02 // == SENSORS == ////
@@ -174,31 +171,76 @@ app.put("/buildings/:id", function (request, response) {
     console.log(buildingUpdate);
 
 
-    dal.updateBuilding(request.params.id.toString(), buildingUpdate, putDateTime);
-    response.send("test complete")
-    /*
+    dal.updateBuilding(request.params.id.toString(), buildingUpdate);
+    response.send({msg:"Building with ID "+request.params.id.toString()+" updated.", link:"../building/"+request.params.id.toString()});
+});
+
+//-------------------------------------------------------------------------------------------------------------------//
+// 04 // == BUILDINGS == ///
+// Construct for new buildings
+
+//-------------------------------------------------------------------------------------------------------------------//
+// 05 // == BUILDINGS == ///
+// Construct for new people
+var newPerson = function (id, lastname, firstname, course, created, updated) {
+    this._id = id;
+    this.lastname = lastname;
+    this.firstname = firstname;
+    this.course = course;
+    this.created = created;
+    this.updated = updated;
+};
+
+// GET requests on /people
+app.get("/people", function (request, response) {
+    dal.getPeople(function (people) {
+        response.send(people);
+    })
+});
+
+// GET request on people/name/:lastname - to find a person based on last name
+app.get("/people/name/:lastname/", function (request, response) {
+    //console.log(request.params.lastname.toString());
+    dal.getPeopleByName(function (person){
+        response.send(person);
+    }, request.params.lastname.toString());
+});
+
+// GET request on people/names/:lastname/:firstname - to find a person based on last name AND firstname
+app.get("/people/names/:lastname/:firstname", function (request, response) {
+    //console.log("last: "+request.params.lastname.toString());
+    //console.log("first: "+request.params.firstname.toString());
+    dal.getPeopleByNames(function (person){
+        response.send(person);
+    }, request.params.lastname.toString(), request.params.firstname.toString());
+});
+
+// GET request on people/:id - to find a person based on ID
+app.get("/people/:id/", function (request, response) {
+    console.log(request.params.id.toString());
+    dal.getPeopleByID(function (person){
+        response.send(person);
+    }, request.params.id.toString());
+});
+
+// POST request on /people to add new person
+app.post("/people", function (request, response) {
+    var person = request.body;
+    var now = new Date();
+    var postDateTime = now.toISOString()
+
     // validate that no fields are empty
-    var errors = val.fieldsNotEmpty(building, "name", "city");
+    var errors = val.fieldsNotEmpty(person, "lastname", "firstname");
     if (errors){
         response.status(400).send({msg:"Following field(s) are mandatory:"+errors.concat()});
         return;
     };
 
-    // validate for non-existing building name
-    dal.getBuildingByName(function(returnNAMEbuilding){
-        console.log('ID: '+returnNAMEbuilding.length);
+    // insert the new person into the databases
+    var personID = shortid.generate(); //generate the unique ID
+    dal.insertPeople(new newPerson(personID, person.lastname, person.firstname, person.course, postDateTime, postDateTime));
+    response.send({msg:"Person "+person.lastname+" "+person.firstname+" with id "+personID+" inserted.", link:"../people/"+personID});
 
-        if (returnNAMEbuilding.length == 0) {
-            var buildingID = shortid.generate(); //generate the unique ID
-            dal.insertBuilding(new newBuilding(buildingID, building.name, building.city, building.longitude, building.latitude, postDateTime, postDateTime));
-            response.send({msg:"Building "+building.name+" with id "+buildingID+" inserted.", link:"../buildings/"+buildingID});
-
-        } else {
-            response.status(409).send({msg:"The building with name '"+building.name+"' is already registered", link:"../buildings/"+returnNAMEbuilding[0]._id});
-        }
-
-    }, building.name);
-    */
 });
 
 //-------------------------------------------------------------------------------------------------------------------//

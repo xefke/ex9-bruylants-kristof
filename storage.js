@@ -190,30 +190,85 @@ db : null,
             });
         });
     },
-    updateBuilding: function (id, update, datetime) {
+    updateBuilding: function (id, update) {
         this.connect(null, function (db) {
             db.collection('buildings').update(
-                // query
+                {_id : id},
+                { $set : update}
+            );
+        })
+    },
+
+    // 04 Locations //
+
+    // 05 Courses //
+
+    // 06 People //
+    insertPeople: function (person, callback) {
+        this.connect(null, function (db) {
+            db.collection('people').insert(person, function (err, result) {
+                //callback(result);
+                console.log('Person inserted');
+                db.close();
+            });
+        });
+    },
+    getPeople: function (peopleCallback) {
+        this.connect(null, function (db) {
+            db.collection('people').find({}).toArray(function (err, doc) {
+                people = doc;
+                db.close();
+                //console.log(sensors);
+                peopleCallback(people);
+            });
+        });
+    },
+    getPeopleByName: function (personCallback, lastname) {
+        this.connect(null, function (db) {
+            db.collection('people').find({lastname: lastname}).toArray(function (err, doc) {
+               person = doc;
+                db.close();
+                //console.log(sensor);
+                personCallback(person);
+            });
+        });
+    },
+    getPeopleByNames: function (personCallback, lastname, firstname) {
+        this.connect(null, function (db) {
+            db.collection('people').find({lastname: lastname, firstname: firstname}).toArray(function (err, doc) {
+                person = doc;
+                db.close();
+                //console.log(sensor);
+                personCallback(person);
+            });
+        });
+    },
+    getPeopleByID: function (personCallback, id) {
+        this.connect(null, function (db) {
+            db.collection('people').find({_id: id}).toArray(function (err, doc) {
+                person = doc;
+                db.close();
+                //console.log(sensor);
+                personCallback(person);
+            });
+        });
+    },
+
+    updatePeople: function (id, update) {
+        this.connect(null, function (db) {
+            db.collection('buildings').update(
                 {_id : id},
                 { $set : update}
             );
         })
     }
 
+
+    // 07 Events //
+
+    // 08 Measurements //
+
 };
 
 module.exports = dal;
 
-/*
-
-col.find({a:1}).limit(2).toArray(function(err, docs) {
-    assert.equal(null, err);
-    assert.equal(2, docs.length);
-    db.close();
-
-
- col.deleteOne({a:1}, function(err, r) {
- assert.equal(null, err);
- assert.equal(1, r.deletedCount);
-
-*/
