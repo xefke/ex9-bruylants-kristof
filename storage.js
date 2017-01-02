@@ -21,7 +21,11 @@ db : null,
         });
     },
 
+    // ================= //
     // Used in ingest.js //
+    // ================= //
+
+    // Clear the collections //
     clearDrone: function (call) {
         this.connect(null, function (db) {
             db.collection('drones').drop(function (err, result) {
@@ -58,6 +62,8 @@ db : null,
             });
         })
     },
+
+    // Insert data //
     insertDrone: function (drone, callback) {
         this.connect(null, function (db) {
             db.collection('drones').insert(drone, function (err, result) {
@@ -95,7 +101,10 @@ db : null,
         });
     },
 
+    // ===================== //
     // Used in distribute.js //
+    // ===================== //
+
     // 01 Drones //
     getDrones: function (dronesCallback) {
         this.connect(null, function (db) {
@@ -200,8 +209,10 @@ db : null,
     },
 
     // 04 Locations //
+    // Under Construction
 
     // 05 Courses //
+    // Under Construction
 
     // 06 People //
     insertPeople: function (person, callback) {

@@ -176,11 +176,15 @@ app.put("/buildings/:id", function (request, response) {
 });
 
 //-------------------------------------------------------------------------------------------------------------------//
-// 04 // == BUILDINGS == ///
-// Construct for new buildings
+// 04 // == LOCATIONS == ///
+// Under Construction
 
 //-------------------------------------------------------------------------------------------------------------------//
-// 05 // == BUILDINGS == ///
+// 05 // == COURSES == ///
+// Under Construction
+
+//-------------------------------------------------------------------------------------------------------------------//
+// 06 // == PEOPLE == ///
 // Construct for new people
 var newPerson = function (id, lastname, firstname, course, created, updated) {
     this._id = id;
@@ -191,6 +195,17 @@ var newPerson = function (id, lastname, firstname, course, created, updated) {
     this.updated = updated;
 };
 
+// function in order to capitalise the first letter of a string for search on names.
+// source: http://www.geekality.net/2010/06/30/javascript-uppercase-first-letter-in-a-string/
+String.prototype.ucfirst = function() {
+    return this.charAt(0).toUpperCase() + this.substr(1);
+};
+
+// Testing the uppercase function
+//var lowercasename = "bruylants";
+//var uppercasename = lowercasename.ucfirst()
+//console.log("test for uppercase: "+uppercasename);
+
 // GET requests on /people
 app.get("/people", function (request, response) {
     dal.getPeople(function (people) {
@@ -200,19 +215,22 @@ app.get("/people", function (request, response) {
 
 // GET request on people/name/:lastname - to find a person based on last name
 app.get("/people/name/:lastname/", function (request, response) {
-    //console.log(request.params.lastname.toString());
+    var lastname = request.params.lastname.toString().ucfirst(); //reformat name into correct casing.
+    console.log("last: "+lastname);
     dal.getPeopleByName(function (person){
         response.send(person);
-    }, request.params.lastname.toString());
+    }, lastname);
 });
 
 // GET request on people/names/:lastname/:firstname - to find a person based on last name AND firstname
 app.get("/people/names/:lastname/:firstname", function (request, response) {
     //console.log("last: "+request.params.lastname.toString());
     //console.log("first: "+request.params.firstname.toString());
+    var lastname = request.params.lastname.toString().ucfirst(); //reformat lastname into correct casing.
+    var firstname = request.params.firstname.toString().ucfirst(); //reformat firstname into correct casing.
     dal.getPeopleByNames(function (person){
         response.send(person);
-    }, request.params.lastname.toString(), request.params.firstname.toString());
+    }, lastname, firstname);
 });
 
 // GET request on people/:id - to find a person based on ID
