@@ -236,7 +236,50 @@ var dal = {
     },
 
     // 04 Locations //
-    // Under Construction
+    insertLocation: function (location, callback) {
+        this.connect(null, function (db) {
+            db.collection('locations').insert(location, function (err, result) {
+                //callback(result);
+                console.log('Location Inserted');
+                db.close();
+            });
+        });
+    },
+    getLocations: function (locationsCallback) {
+        this.connect(null, function (db) {
+            db.collection('locations').find({}).toArray(function (err, doc) {
+                locations = doc;
+                db.close();
+                locationsCallback(locations);
+            });
+        });
+    },
+    getLocationByID: function (locationCallback, id) {
+        this.connect(null, function (db) {
+            db.collection('locations').find({_id: id}).toArray(function (err, doc) {
+                location = doc;
+                db.close();
+                locationCallback(location);
+            });
+        });
+    },
+    getLocationsByBuilding: function (locationsCallback, building) {
+        this.connect(null, function (db) {
+            db.collection('locations').find({building: building}).toArray(function (err, doc) {
+                locations = doc;
+                db.close();
+                locationsCallback(locations);
+            });
+        });
+    },
+    updateLocation: function (id, update) {
+        this.connect(null, function (db) {
+            db.collection('buildings').update(
+                {_id : id},
+                { $set : update}
+            );
+        })
+    },
 
     // 05 Courses //
     // Under Construction

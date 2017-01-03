@@ -138,6 +138,13 @@ app.get("/buildings", function (request, response) {
     })
 });
 
+app.get("/buildings/:name", function (request, response) {
+    var name = request.params.name.toString().ucfirst(); //reformat name into correct casing.
+    dal.getBuildingByName(function (building){
+        response.send(building);
+    }, name);
+});
+
 // POST request on /buildings to add new building
 app.post("/buildings", function (request, response) {
     var building = request.body;
@@ -185,8 +192,79 @@ app.put("/buildings/:id", function (request, response) {
 
 //-------------------------------------------------------------------------------------------------------------------//
 // 04 // == LOCATIONS == ///
-// Under Construction
+// Construct for new locations
+var newLocation = function (id, name, building, buildingref, created, updated) {
+    this._id = id;
+    this.name = name;
+    this.building = building;
+    this.buildingref = buildingref;
+    this.created = created;
+    this.updated = updated;
+};
+// GET requests on /locations
+app.get("/locations", function (request, response) {
+    dal.getLocations(function (locations) {
+        response.send(locations);
+    })
+});
 
+// GET requests on /locations with ID => /locations/:id
+app.get("/locations/:id", function (request, response) {
+    dal.getLocationByID(function (location){
+        response.send(location);
+    }, request.params.id.toString());
+});
+
+// GET requests on /locations/buildings with name => /locations/buildings/:name
+app.get("/locations/buildings/:name", function (request, response) {
+    var building = request.params.name.toString().ucfirst(); // make sure the search is in correct capitalisation
+    dal.getLocationsByBuilding(function (location){
+        response.send(location);
+    }, building);
+});
+
+// POST request on /locations to add a new location
+app.post("/locations", function (request, response) {
+    var location = request.body;
+    var now = new Date();
+    var postDateTime = now.toISOString()
+
+    // validate that no fields are empty
+    var errors = val.fieldsNotEmpty(location, "name");
+    if (errors){
+        response.status(400).send({msg:"Following field(s) are mandatory:"+errors.concat()});
+        return;
+    };
+
+    // insert the new location into the databases
+    var locationID = shortid.generate(); //generate the unique ID
+    var nameUC = location.name.ucfirst(); // make sure all location names are in the database with first letter capitals
+    dal.getBuildingByName(function(returnBuilding){
+        if (returnBuilding.length != 0) {
+            console.log('buildingref.: '+returnBuilding[0]._id);
+            var locationBuildingRef = "buildings/"+returnBuilding[0]._id;
+            dal.insertLocation(new newLocation(locationID, nameUC, location.building, locationBuildingRef, postDateTime, postDateTime));
+            response.send({msg:"Location '"+nameUC+"' with id "+locationID+" inserted.", link:"../locations/"+locationID});
+
+        } else {
+            response.status(409).send({msg:"The building with name '"+location.building+"' does not exist. Create this first."});
+        }
+    },location.building);
+
+});
+
+// PUT request on /buildings/:id to update a building
+app.put("/buildings/:id", function (request, response) {
+    var now = new Date();
+    var putDateTime = now.toISOString();
+    var buildingUpdate = request.body;
+    buildingUpdate.updated = putDateTime
+    console.log(buildingUpdate);
+
+
+    dal.updateBuilding(request.params.id.toString(), buildingUpdate);
+    response.send({msg:"Building with ID "+request.params.id.toString()+" updated.", link:"../building/"+request.params.id.toString()});
+});
 //-------------------------------------------------------------------------------------------------------------------//
 // 05 // == COURSES == ///
 // Under Construction
