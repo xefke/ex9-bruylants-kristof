@@ -348,14 +348,57 @@ var dal = {
                 { $set : update}
             );
         })
-    }
+    },
 
     // 07 Events //
     // Under Construction
 
     // 08 Measurements //
-    // Under Construction
-
+    getMeasurements: function (measurementsCallback) {
+        this.connect(null, function (db) {
+            db.collection('measurements').find({}).toArray(function (err, doc) {
+                measurements = doc;
+                db.close();
+                measurementsCallback(measurements);
+            });
+        });
+    },
+    getMeasurementsByID: function (measurementCallback, id) {
+        this.connect(null, function (db) {
+            db.collection('measurements').find({_id: id}).toArray(function (err, doc) {
+                measurement = doc;
+                db.close();
+                measurement.length === 0 ? measurementCallback("No measurements with ID '"+id+"' found. Please check your spelling and try again.") : measurementCallback(measurement);
+            });
+        });
+    },
+    getMeasurementsByBuilding: function (measurementsCallback, buildingName) {
+        this.connect(null, function (db) {
+            db.collection('measurements').find({building: buildingName}).toArray(function (err, doc) {
+                measurements = doc;
+                db.close();
+                measurements.length === 0 ? measurementsCallback("No measurements in building '"+buildingName+"' found. Please check your spelling and try again.") : measurementsCallback(measurements);
+            });
+        });
+    },
+    getMeasurementsByLocation: function (measurementsCallback, locationName) {
+        this.connect(null, function (db) {
+            db.collection('measurements').find({location: locationName}).toArray(function (err, doc) {
+                measurements = doc;
+                db.close();
+                measurements.length === 0 ? measurementsCallback("No measurements in location '"+locationName+"' found. Please check your spelling and try again.") : measurementsCallback(measurements);
+            });
+        });
+    },
+    getMeasurementsByType: function (measurementsCallback, type) {
+        this.connect(null, function (db) {
+            db.collection('measurements').find({type: type}).toArray(function (err, doc) {
+                measurements = doc;
+                db.close();
+                measurements.length === 0 ? measurementsCallback("No measurements with type '"+type+"' found. Please check your spelling and try again.") : measurementsCallback(measurements);
+            });
+        });
+    }
 };
 
 module.exports = dal;

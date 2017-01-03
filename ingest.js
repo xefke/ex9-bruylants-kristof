@@ -142,7 +142,7 @@ request(dronesSettings, function (error, response, dronesString) { // call 1: Li
                                     try { //error start for contents
                                     var content = JSON.parse(contentString);
                                         // additional data
-                                        var contentType = "probe";
+                                        var contentType = "Probe";
                                         var contentSource = "drones/"+drone.id;
                                         var contentLocationRef = "locations/"+locationID;
                                         var contentBuilding = "Zandpoortvest";

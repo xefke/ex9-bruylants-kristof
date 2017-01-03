@@ -62,7 +62,7 @@ app.post("/drones", function (request, response) {
     var postDateTime = now.toISOString()
 
     // validate that no obligated fields are empty
-    var errors = val.fieldsNotEmpty(drone,"id", "name", "mac_address", "location");
+    var errors = val.fieldsNotEmpty(drone, "name", "mac_address", "location");
     if (errors){
         response.status(400).send({msg:"Following field(s) are mandatory:"+errors.concat()});
         return;
@@ -70,25 +70,19 @@ app.post("/drones", function (request, response) {
 
     // validate for non-existing drone ID and drone MAC address
     dal.getDroneByID(function(returnIDdrone){
-        console.log('ID: '+returnIDdrone.length);
-
         if (returnIDdrone.length == 0) {
             dal.getDroneByMac(function(returnMACdrone){
-                console.log('mac: '+returnMACdrone.length)
-
                 if (returnMACdrone.length == 0) {
                     //insert the drone in the database and send response
-                    dal.insertDrone(new newDrone(drone.id, drone.name, drone.mac_address, drone.location, postDateTime, postDateTime));
-                    response.send("Drone with id "+drone.id+" inserted.");
-
+                    var droneID = shortid.generate(); //generate the unique ID
+                    dal.insertDrone(new newDrone(droneID, drone.name, drone.mac_address, drone.location, postDateTime, postDateTime));
+                    response.send("Drone with id "+droneID+" inserted.");
                 } else {
                     response.status(409).send({msg:"The drone MAC address is already registered", link:"../drones/"+returnMACdrone[0]._id});
                 }
             }, drone.mac_address);
-
         } else {
-            response.status(409).send({msg:"The drone ID is already registered"});
-            //response.status(409).send({msg:"The drone ID is already registered", link:"../drones/"+returnIDdrone[0]._id});
+            response.status(409).send({msg:"The drone ID is already registered", link:"../drones/"+returnIDdrone[0]._id});
         }
     }, drone.id);
 });
@@ -166,8 +160,6 @@ app.post("/buildings", function (request, response) {
 
     // validate for non-existing building name
     dal.getBuildingByName(function(returnNAMEbuilding){
-        console.log('ID: '+returnNAMEbuilding.length);
-
         if (returnNAMEbuilding.length == 0) {
             var buildingID = shortid.generate(); //generate the unique ID
             var nameUC = building.name.ucfirst(); // make sure all building name are in the database with first letter capitals
@@ -329,7 +321,6 @@ app.get("/people", function (request, response) {
 // GET request on people/name/:lastname - to find a person based on last name
 app.get("/people/name/:lastname/", function (request, response) {
     var lastname = request.params.lastname.toString().ucfirst(); //reformat name into correct casing.
-    console.log("last: "+lastname);
     dal.getPeopleByName(function (person){
         response.send(person);
     }, lastname);
@@ -346,7 +337,6 @@ app.get("/people/names/:lastname/:firstname", function (request, response) {
 
 // GET request on people/:id - to find a person based on ID
 app.get("/people/:id/", function (request, response) {
-    console.log(request.params.id.toString());
     dal.getPeopleByID(function (person){
         response.send(person);
     }, request.params.id.toString());
@@ -394,7 +384,43 @@ app.put("/people/:id", function (request, response) {
 
 //-------------------------------------------------------------------------------------------------------------------//
 // 08 // == MEASUREMENTS == ///
-// Under Construction
+// GET requests on /measurements
+app.get("/measurements", function (request, response) {
+    dal.getMeasurements(function (people) {
+        response.send(people);
+    })
+});
+
+// GET requests on /measurements/:id => get the measurement for a specified ID
+app.get("/measurements/:id", function (request, response) {
+    dal.getMeasurementsByID(function (measurement){
+        response.send(measurement);
+    }, request.params.id.toString());
+});
+
+// GET requests on /measurements/buildings/:name => get all measurements for a specified building
+app.get("/measurements/buildings/:name", function (request, response) {
+    var buildingName = request.params.name.toString().ucfirst(); //reformat name into correct casing.
+    dal.getMeasurementsByBuilding(function (measurements){
+        response.send(measurements);
+    }, buildingName);
+});
+
+// GET requests on /measurements/locations/:name => get all measurements for a specified location
+app.get("/measurements/locations/:name", function (request, response) {
+    var locationName = request.params.name.toString().ucfirst(); //reformat name into correct casing.
+    dal.getMeasurementsByLocation(function (measurements){
+        response.send(measurements);
+    }, locationName);
+});
+
+// GET requests on /measurements/types/:type => get all measurements for a specified type
+app.get("/measurements/types/:type", function (request, response) {
+    var type = request.params.type.toString().ucfirst(); //reformat name into correct casing.
+    dal.getMeasurementsByType(function (measurements){
+        response.send(measurements);
+    }, type);
+});
 
 //-------------------------------------------------------------------------------------------------------------------//
 // *** END ***
