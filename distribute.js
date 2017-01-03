@@ -61,9 +61,7 @@ app.post("/drones", function (request, response) {
     var now = new Date();
     var postDateTime = now.toISOString()
 
-    //console.log(drone);
-
-    // validate that no fields are empty
+    // validate that no obligated fields are empty
     var errors = val.fieldsNotEmpty(drone,"id", "name", "mac_address", "location");
     if (errors){
         response.status(400).send({msg:"Following field(s) are mandatory:"+errors.concat()});
@@ -93,10 +91,6 @@ app.post("/drones", function (request, response) {
             //response.status(409).send({msg:"The drone ID is already registered", link:"../drones/"+returnIDdrone[0]._id});
         }
     }, drone.id);
-
-    //insert the drone in the database and send response
-    //dal.insertDrone(new newDrone(drone.id, drone.name, drone.mac_address, drone.location, postDateTime, postDateTime));
-    //response.send("Drone with id "+drone.id+" inserted.");
 });
 
 //-------------------------------------------------------------------------------------------------------------------//
@@ -161,8 +155,7 @@ app.get("/buildings/names/:name", function (request, response) {
 app.post("/buildings", function (request, response) {
     var building = request.body;
     var now = new Date();
-    var postDateTime = now.toISOString()
-
+    var postDateTime = now.toISOString();
 
     // validate that no fields are empty
     var errors = val.fieldsNotEmpty(building, "name", "city");
@@ -181,11 +174,9 @@ app.post("/buildings", function (request, response) {
             var cityUC = building.city.ucfirst(); // make sure all city names are in the database with first letter capitals
             dal.insertBuilding(new newBuilding(buildingID, nameUC, cityUC, building.longitude, building.latitude, postDateTime, postDateTime));
             response.send({msg:"Building "+building.name+" with id "+buildingID+" inserted.", link:"../buildings/"+buildingID});
-
         } else {
             response.status(409).send({msg:"The building with name '"+building.name+"' is already registered", link:"../buildings/"+returnNAMEbuilding[0]._id});
         }
-
     }, building.name);
 });
 
@@ -195,8 +186,6 @@ app.put("/buildings/:id", function (request, response) {
     var putDateTime = now.toISOString();
     var buildingUpdate = request.body;
     buildingUpdate.updated = putDateTime
-    console.log(buildingUpdate);
-
 
     dal.updateBuilding(request.params.id.toString(), buildingUpdate);
     response.send({msg:"Building with ID "+request.params.id.toString()+" updated.", link:"../buildings/"+request.params.id.toString()});
@@ -238,6 +227,7 @@ var newLocation = function (id, name, length, width, volume, capacity, building,
     this.created = created;
     this.updated = updated;
 };
+
 // GET requests on /locations
 app.get("/locations", function (request, response) {
     dal.getLocations(function (locations) {
@@ -283,7 +273,6 @@ app.post("/locations", function (request, response) {
             var locationBuildingRef = "buildings/"+returnBuilding[0]._id;
             dal.insertLocation(new newLocation(locationID, nameUC, location.length, location.width, location.volume, location.capacity, buildingUC, locationBuildingRef, postDateTime, postDateTime));
             response.send({msg:"Location '"+nameUC+"' with id "+locationID+" inserted.", link:"../locations/"+locationID});
-
         } else {
             response.status(409).send({msg:"The building with name '"+location.building+"' does not exist. Create this first."});
         }
@@ -348,8 +337,6 @@ app.get("/people/name/:lastname/", function (request, response) {
 
 // GET request on people/names/:lastname/:firstname - to find a person based on last name AND firstname
 app.get("/people/names/:lastname/:firstname", function (request, response) {
-    //console.log("last: "+request.params.lastname.toString());
-    //console.log("first: "+request.params.firstname.toString());
     var lastname = request.params.lastname.toString().ucfirst(); //reformat lastname into correct casing.
     var firstname = request.params.firstname.toString().ucfirst(); //reformat firstname into correct casing.
     dal.getPeopleByNames(function (person){
@@ -384,7 +371,6 @@ app.post("/people", function (request, response) {
     var firstnameUC = person.firstname.ucfirst(); // make sure all firstnames are in the database with first letter capitals
     dal.insertPeople(new newPerson(personID, lastnameUC, firstnameUC, person.course, postDateTime, postDateTime));
     response.send({msg:"Person "+person.lastname+" "+person.firstname+" with id "+personID+" inserted.", link:"../people/"+personID});
-
 });
 
 // PUT request on /people/:id to update a person
@@ -411,9 +397,5 @@ app.put("/people/:id", function (request, response) {
 // Under Construction
 
 //-------------------------------------------------------------------------------------------------------------------//
-//-------------------------------------------------------------------------------------------------------------------//
-
-
-//-------------------------------------------------------------------------------------------------------------------//
-//-------------------------------------------------------------------------------------------------------------------//
+// *** END ***
 //-------------------------------------------------------------------------------------------------------------------//

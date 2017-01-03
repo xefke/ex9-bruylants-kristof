@@ -15,7 +15,6 @@ var dal = {
         MongoClient.connect(url, function (error, db) {
             if (error)
                 throw new Error(error);
-            //console.log("Connected successfully to server");
             this.db = db;
             result(db)
         });
@@ -26,55 +25,49 @@ var dal = {
     // ================= //
 
     // Clear the collections //
-    clearDrone: function (call) {
+    clearDrone: function () {
         this.connect(null, function (db) {
             db.collection('drones').drop(function (err, result) {
-                //callback(result);
                 console.log("collection drones dropped");
                 db.close();
             });
         })
     },
-    clearLocation: function (call) {
+    clearLocation: function () {
         this.connect(null, function (db) {
             db.collection('locations').drop(function (err, result) {
-                //callback(result);
                 console.log("collection locations dropped");
                 db.close();
             });
         })
     },
-    clearFileHeaders: function (call) {
+    clearFileHeaders: function () {
         this.connect(null, function (db) {
             db.collection('filesheaders').drop(function (err, result) {
-                //callback(result);
                 console.log("collection filesheaders dropped");
                 db.close();
             });
         })
     },
-    clearFile: function (call) {
+    clearFile: function () {
         this.connect(null, function (db) {
             db.collection('files').drop(function (err, result) {
-                //callback(result);
                 console.log("collection files dropped");
                 db.close();
             });
         })
     },
-    clearContent: function (call) {
+    clearContent: function () {
         this.connect(null, function (db) {
             db.collection('contents').drop(function (err, result) {
-                //callback(result);
                 console.log("collection contents dropped");
                 db.close();
             });
         })
     },
-    clearMeasurement: function (call) {
+    clearMeasurement: function () {
         this.connect(null, function (db) {
             db.collection('measurements').drop(function (err, result) {
-                //callback(result);
                 console.log("collection measurements dropped");
                 db.close();
             });
@@ -138,7 +131,6 @@ var dal = {
             db.collection('drones').find({}).toArray(function (err, doc) {
                 drones = doc;
                 db.close();
-                //console.log(drones);
                 dronesCallback(drones);
             });
         });
@@ -148,7 +140,6 @@ var dal = {
             db.collection('drones').find({_id: id}).toArray(function (err, doc) {
                 drone = doc;
                 db.close();
-                //console.log(drone);
                 droneCallback(drone);
             });
         });
@@ -158,7 +149,6 @@ var dal = {
             db.collection('drones').find({mac: mac}).toArray(function (err, doc) {
                 drone = doc;
                 db.close();
-                //console.log(drone);
                 droneCallback(drone);
             });
         });
@@ -170,7 +160,6 @@ var dal = {
             db.collection('sensors').find({}).toArray(function (err, doc) {
                 sensors = doc;
                 db.close();
-                //console.log(sensors);
                 sensorsCallback(sensors);
             });
         });
@@ -180,7 +169,6 @@ var dal = {
             db.collection('sensors').find({droneid: id}).toArray(function (err, doc) {
                 sensors = doc;
                 db.close();
-                //console.log(sensors);
                 droneSensorsCallback(sensors);
             });
         });
@@ -230,7 +218,6 @@ var dal = {
             db.collection('buildings').find({name: name}).toArray(function (err, doc) {
                 building = doc;
                 db.close();
-                //console.log(sensor);
                 buildingCallback(building);
             });
         });
@@ -245,7 +232,6 @@ var dal = {
     },
     deleteBuilding: function (id){
         this.connect(null, function (db) {
-            //console.log(id);
             db.collection('buildings').remove({_id: id});
             db.close();
         })
@@ -323,7 +309,6 @@ var dal = {
             db.collection('people').find({}).toArray(function (err, doc) {
                 people = doc;
                 db.close();
-                //console.log(sensors);
                 peopleCallback(people);
             });
         });
@@ -352,7 +337,6 @@ var dal = {
             db.collection('people').find({_id: id}).toArray(function (err, doc) {
                 person = doc;
                 db.close();
-                //console.log(sensor);
                 personCallback(person);
             });
         });

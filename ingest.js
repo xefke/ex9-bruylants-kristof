@@ -80,12 +80,8 @@ dal.clearFile(); // to delete the collection of files
 //dal.clearContent(); // to delete the collection of contents
 dal.clearMeasurement(); // to delete the collection of contents
 
-// FOR TESTING PURPOSES ONLY !!!!
-// ==============================
-/* For testing I decided to use a fixed drone ID, one of this drone's file ID */
-//var fixedDroneID = '68543c10992f465e927b21c25675263b';
-//var fixedFileID = '022e728cbe434e2db6444481bc8f7754';
-
+// Filling the DB
+// ==============
 // 1 - GET THE LIST OF DRONES
 var dronesSettings = new Settings("/drones?format=json"); // build the necessairy URL
 request(dronesSettings, function (error, response, dronesString) { // call 1: List all drones
@@ -95,11 +91,9 @@ request(dronesSettings, function (error, response, dronesString) { // call 1: Li
 
     // 2 - DO SOMETHING FOR EACH DRONE IN THE LIST
     drones.forEach(function (drone) {
-        //console.log('drone ID:' +drone.id);
 
         // 3 - GET THE DETAILS FOR EACH FOUND DRONE AND WRITE THEM TO DB, RINSE AND REPEAT
         var droneSettings = new Settings("/drones/" + drone.id + "?format=json");
-        //var droneSettings = new Settings("/drones/" + fixedDroneID + "?format=json");
         request(droneSettings, function (error, response, droneString) { // call 2: list details for each drone ID of the call 1 list + write to DB
             var drone = JSON.parse(droneString);
             //console.log(drone.id); // since this per drone, drone.id is possible
@@ -114,7 +108,6 @@ request(dronesSettings, function (error, response, dronesString) { // call 1: Li
 
             // 4 - GET THE LIST OF FILES FOR EACH DRONE
             var filesHeaderSettings = new Settings("/files?drone_id.is=" + drone.id + "&format=json&date_loaded.greaterOrEqual=2016-12-27"); // filtered on a few days
-            //var filesHeaderSettings = new Settings("/files?drone_id.is=" + fixedDroneID + "&format=json");
             request(filesHeaderSettings, function (error, response, fileheadersString) { // call 3: list all file headers for all drones
                 try{ //error start for fileHeaders
                 var fileHeaders = JSON.parse(fileheadersString);
@@ -127,17 +120,14 @@ request(dronesSettings, function (error, response, dronesString) { // call 1: Li
 
                     // 6 -  GET THE DETAILS FOR EACH FILE AND WRITE THEM TO DB, AGAIN, RINSE AND REPEAT
                     var fileSettings = new Settings("/files/"+file.id+"?format=json");
-                    //var fileSettings = new Settings("/files/"+fixedFileID+"?format=json");
                     request(fileSettings, function (error, response, fileString) { // call 4: details for all files + write to db
                         try{ //error start for files
                         var file = JSON.parse(fileString);
-                        //console.log('file ID:'+file.id+ ' drone ref.: '+ file.ref+' contents: '+file.contents_count);
                         dal.insertFile(new File(file.id, file.date_loaded, file.date_first_record, file.date_last_record, file.ref, file.contents_count));
                         //console.log('File | ID: '+file.id+' Load Date: '+file.date_loaded+' First Record: '+file.date_first_record+' Last Record: '+file.date_last_record+' Ref.: '+file.ref);
 
                         // 7 - GET THE LIST OF CONTENTS PER FILE
                         var contentHeadersSettings = new Settings("/files/"+file.id+"/contents?format=json");
-                        //var contentHeadersSettings = new Settings("/files/"+fixedFileID+"/contents?format=json");
                         request(contentHeadersSettings, function (error, response, contentheadersString) { // call 5: list all content headers for all files
                             try{
                             var contentHeaders = JSON.parse(contentheadersString);
@@ -148,7 +138,6 @@ request(dronesSettings, function (error, response, dronesString) { // call 1: Li
 
                                 // 9 - GET THE DETAILS FOR EACH CONTENT AND WRITE TO THE DB
                                 var contentSettings = new Settings("/files/"+file.id+"/contents/"+content.id+"?format=json");
-                                //var contentSettings = new Settings("/files/"+fixedFileID+"/contents/"+content.id+"?format=json");
                                 request(contentSettings, function(error, response, contentString) {
                                     try { //error start for contents
                                     var content = JSON.parse(contentString);
