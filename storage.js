@@ -216,6 +216,15 @@ var dal = {
             });
         });
     },
+    getBuildingByID: function (buildingCallback, id) {
+        this.connect(null, function (db) {
+            db.collection('buildings').find({_id: id}).toArray(function (err, doc) {
+                building = doc;
+                db.close();
+                buildingCallback(building);
+            });
+        });
+    },
     getBuildingByName: function (buildingCallback, name) {
         this.connect(null, function (db) {
             db.collection('buildings').find({name: name}).toArray(function (err, doc) {
@@ -232,6 +241,13 @@ var dal = {
                 {_id : id},
                 { $set : update}
             );
+        })
+    },
+    deleteBuilding: function (id){
+        this.connect(null, function (db) {
+            //console.log(id);
+            db.collection('buildings').remove({_id: id});
+            db.close();
         })
     },
 
@@ -274,10 +290,18 @@ var dal = {
     },
     updateLocation: function (id, update) {
         this.connect(null, function (db) {
-            db.collection('buildings').update(
+            db.collection('locations').update(
                 {_id : id},
                 { $set : update}
             );
+            db.close();
+        })
+    },
+    deleteLocation: function (id){
+        this.connect(null, function (db) {
+            console.log(id);
+            db.collection('locations').remove({_id: id});
+            db.close();
         })
     },
 

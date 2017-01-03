@@ -31,9 +31,13 @@ var Drone = function (id, name, mac, location, created, updated) {
     this.created = created;
     this.updated = updated;
 };
-var Location = function (id, name, building, buildingref, created, updated) {
+var Location = function (id, name, length, width, volume, capacity, building, buildingref, created, updated) {
     this._id = id;
     this.name = name;
+    this.loclength = length;
+    this.locwidth = width;
+    this.volume = volume;
+    this.capacity = capacity;
     this.building = building;
     this.buildingref = buildingref;
     this.created = created;
@@ -105,7 +109,7 @@ request(dronesSettings, function (error, response, dronesString) { // call 1: Li
             var locationBuilding = "Zandpoortvest"
             var locationBuildingRef = "buildings/BJ19uwZBe"
             dal.insertDrone(new Drone(drone.id, drone.name, drone.mac_address, drone.location, droneDateTime, droneDateTime));
-            dal.insertLocation(new Location(locationID, drone.location, locationBuilding, locationBuildingRef, droneDateTime, droneDateTime));
+            dal.insertLocation(new Location(locationID, drone.location, null, null, null, null, locationBuilding, locationBuildingRef, droneDateTime, droneDateTime));
             //console.log('Drone | ID: '+drone.id+' Name: '+drone.name+' MAC: '+drone.mac_address+' Location: '+drone.location);
 
             // 4 - GET THE LIST OF FILES FOR EACH DRONE

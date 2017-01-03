@@ -2,7 +2,7 @@
  * Created by Xefke on 16/12/2016.
  */
 
-//load dependencies
+// load dependencies
 var express = require('express');
 var parser = require('body-parser');
 var shortid = require('shortid'); // $npm install shortid --save
@@ -14,6 +14,10 @@ var val = require("./validate");
 // create webservice
 var app = express();
 app.use(parser.json());
+
+// run webservice //
+app.listen(4567);
+console.log("server is running");
 
 // function in order to capitalise the first letter of a string for search on names.
 // source: http://www.geekality.net/2010/06/30/javascript-uppercase-first-letter-in-a-string/
@@ -138,7 +142,15 @@ app.get("/buildings", function (request, response) {
     })
 });
 
-app.get("/buildings/:name", function (request, response) {
+// GET requests on /buildings/:id
+app.get("/buildings/:id", function (request, response) {
+    dal.getBuildingByID(function (building){
+        response.send(building);
+    }, request.params.id.toString());
+});
+
+// GET requests on /buildings/names/:name
+app.get("/buildings/names/:name", function (request, response) {
     var name = request.params.name.toString().ucfirst(); //reformat name into correct casing.
     dal.getBuildingByName(function (building){
         response.send(building);
@@ -187,15 +199,40 @@ app.put("/buildings/:id", function (request, response) {
 
 
     dal.updateBuilding(request.params.id.toString(), buildingUpdate);
-    response.send({msg:"Building with ID "+request.params.id.toString()+" updated.", link:"../building/"+request.params.id.toString()});
+    response.send({msg:"Building with ID "+request.params.id.toString()+" updated.", link:"../buildings/"+request.params.id.toString()});
+});
+
+// DELETE requests on /buildings with ID => /buildings/:id
+app.delete("/buildings/:id", function (request, response) {
+    dal.getBuildingByID(function (building){ // check if the location exists
+        if (building.length == 0) { // if not, display message
+            response.send({msg:"Building with ID "+request.params.id.toString()+" does not exist."});
+        } else { //if so, check for use of this building in other resources.
+            console.log(building);
+            console.log(building[0].name);
+            var buildingName = building[0].name.ucfirst(); // make sure the search is in correct capitalisation
+            dal.getLocationsByBuilding(function(location){ // check if the building is used in locations
+                if (location.length != 0) {
+                    response.send({msg:"Building with ID "+request.params.id.toString()+" is in use for a location.", link:"../locations/"+location[0]._id});
+                } else { // if not used in locations, then delete it and confirm
+                    dal.deleteBuilding(request.params.id.toString());
+                    response.send({msg:"Buildings with ID "+request.params.id.toString()+" deleted."});
+                }
+            },buildingName);
+        }
+    }, request.params.id.toString());
 });
 
 //-------------------------------------------------------------------------------------------------------------------//
 // 04 // == LOCATIONS == ///
 // Construct for new locations
-var newLocation = function (id, name, building, buildingref, created, updated) {
+var newLocation = function (id, name, length, width, volume, capacity, building, buildingref, created, updated) {
     this._id = id;
     this.name = name;
+    this.loclength = length;
+    this.locwidth = width;
+    this.volume = volume;
+    this.capacity = capacity;
     this.building = building;
     this.buildingref = buildingref;
     this.created = created;
@@ -239,32 +276,44 @@ app.post("/locations", function (request, response) {
     // insert the new location into the databases
     var locationID = shortid.generate(); //generate the unique ID
     var nameUC = location.name.ucfirst(); // make sure all location names are in the database with first letter capitals
+    var buildingUC = location.building.ucfirst();
     dal.getBuildingByName(function(returnBuilding){
         if (returnBuilding.length != 0) {
             console.log('buildingref.: '+returnBuilding[0]._id);
             var locationBuildingRef = "buildings/"+returnBuilding[0]._id;
-            dal.insertLocation(new newLocation(locationID, nameUC, location.building, locationBuildingRef, postDateTime, postDateTime));
+            dal.insertLocation(new newLocation(locationID, nameUC, location.length, location.width, location.volume, location.capacity, buildingUC, locationBuildingRef, postDateTime, postDateTime));
             response.send({msg:"Location '"+nameUC+"' with id "+locationID+" inserted.", link:"../locations/"+locationID});
 
         } else {
             response.status(409).send({msg:"The building with name '"+location.building+"' does not exist. Create this first."});
         }
-    },location.building);
+    },buildingUC);
 
 });
 
 // PUT request on /buildings/:id to update a building
-app.put("/buildings/:id", function (request, response) {
+app.put("/locations/:id", function (request, response) {
     var now = new Date();
     var putDateTime = now.toISOString();
-    var buildingUpdate = request.body;
-    buildingUpdate.updated = putDateTime
-    console.log(buildingUpdate);
+    var locationUpdate = request.body;
+    locationUpdate.updated = putDateTime
 
-
-    dal.updateBuilding(request.params.id.toString(), buildingUpdate);
-    response.send({msg:"Building with ID "+request.params.id.toString()+" updated.", link:"../building/"+request.params.id.toString()});
+    dal.updateLocation(request.params.id.toString(), locationUpdate);
+    response.send({msg:"Location with ID "+request.params.id.toString()+" updated.", link:"../locations/"+request.params.id.toString()});
 });
+
+// DELETE requests on /locations with ID => /locations/:id
+app.delete("/locations/:id", function (request, response) {
+    dal.getLocationByID(function (location){ // check if the location exists
+        if (location.length == 0) { // if not, display message
+            response.send({msg:"Location with ID "+request.params.id.toString()+" does not exist."});
+        } else { //if so, delete it and confirm
+            dal.deleteLocation(request.params.id.toString());
+            response.send({msg:"Location with ID "+request.params.id.toString()+" deleted."});
+        }
+    }, request.params.id.toString());
+});
+
 //-------------------------------------------------------------------------------------------------------------------//
 // 05 // == COURSES == ///
 // Under Construction
@@ -363,9 +412,7 @@ app.put("/people/:id", function (request, response) {
 
 //-------------------------------------------------------------------------------------------------------------------//
 //-------------------------------------------------------------------------------------------------------------------//
-// RUN SERVER //
-app.listen(4567);
-console.log("server is running");
+
 
 //-------------------------------------------------------------------------------------------------------------------//
 //-------------------------------------------------------------------------------------------------------------------//
