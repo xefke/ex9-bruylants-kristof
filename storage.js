@@ -35,6 +35,15 @@ var dal = {
             });
         })
     },
+    clearLocation: function (call) {
+        this.connect(null, function (db) {
+            db.collection('locations').drop(function (err, result) {
+                //callback(result);
+                console.log("collection locations dropped");
+                db.close();
+            });
+        })
+    },
     clearFileHeaders: function (call) {
         this.connect(null, function (db) {
             db.collection('filesheaders').drop(function (err, result) {
@@ -62,6 +71,15 @@ var dal = {
             });
         })
     },
+    clearMeasurement: function (call) {
+        this.connect(null, function (db) {
+            db.collection('measurements').drop(function (err, result) {
+                //callback(result);
+                console.log("collection measurements dropped");
+                db.close();
+            });
+        })
+    },
 
     // Insert data //
     insertDrone: function (drone, callback) {
@@ -69,6 +87,15 @@ var dal = {
             db.collection('drones').insert(drone, function (err, result) {
                 //callback(result);
                 console.log('- Drone Inserted');
+                db.close();
+            });
+        });
+    },
+    insertLocation: function (location, callback) {
+        this.connect(null, function (db) {
+            db.collection('locations').insert(location, function (err, result) {
+                //callback(result);
+                console.log('- Location Inserted');
                 db.close();
             });
         });
@@ -93,7 +120,7 @@ var dal = {
     },
     insertContent: function (content, callback) {
         this.connect(null, function (db) {
-            db.collection('contents').insert(content, function (err, result) {
+            db.collection('measurements').insert(content, function (err, result) {
                 //callback(result);
                 console.log('- - - - Content Inserted');
                 db.close();

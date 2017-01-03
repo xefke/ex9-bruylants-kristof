@@ -5,6 +5,7 @@
 // >$ npm install request --save
 var request = require("request");
 var dal = require('./storage');
+var shortid = require('shortid'); // $npm install shortid --save
 
 // http://stackoverflow.com/questions/10888610/ignore-invalid-self-signed-ssl-certificate-in-node-js-with-https-request
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
@@ -30,6 +31,14 @@ var Drone = function (id, name, mac, location, created, updated) {
     this.created = created;
     this.updated = updated;
 };
+var Location = function (id, name, building, buildingref, created, updated) {
+    this._id = id;
+    this.name = name;
+    this.building = building;
+    this.buildingref = buildingref;
+    this.created = created;
+    this.updated = updated;
+};
 var FileHeader = function (fileid, droneref) {
     this._id = fileid;
     this.droneref = droneref;
@@ -42,24 +51,30 @@ var File = function (fileid, dateLoaded, first_rec, last_rec, droneid, records) 
     this.drone_ref = droneid
     this.contents_count = records;
 };
-var Content = function (contentid, macaddress, contentdate, rssi, fileref) {
+var Content = function (contentid, type, contentdate, source, location, locationref, building, buildingref, macaddress, rssi, created, updated, fileref) {
     this._id = contentid;
+    this.type = type;
+    this.timestamp = contentdate;
+    this.source = source;
+    this.location = location;
+    this.locationref = locationref
+    this.building = building;
+    this.buildingref = buildingref
     this.mac_address = macaddress;
-    this.contentdate = contentdate;
     this.rssi = rssi;
+    this.created = created;
+    this.updated = updated;
     this.ref = fileref;
 };
 
 // Clearing DB before adding the new data
 // ======================================
-//dal.clearDrone(); // to delete the collection of drones
-//dal.clearFileHeaders(); // to delete the collection of files
-//dal.clearFile(); // to delete the collection of files
+dal.clearDrone(); // to delete the collection of drones
+dal.clearLocation(); // to delete the collection of locations
+dal.clearFileHeaders(); // to delete the collection of files
+dal.clearFile(); // to delete the collection of files
 //dal.clearContent(); // to delete the collection of contents
-
-//dal.getDrones();
-//dal.getDroneByID('5a92f5f3cdbc4ec580f0fde904713898');
-
+dal.clearMeasurement(); // to delete the collection of contents
 
 // FOR TESTING PURPOSES ONLY !!!!
 // ==============================
@@ -86,13 +101,18 @@ request(dronesSettings, function (error, response, dronesString) { // call 1: Li
             //console.log(drone.id); // since this per drone, drone.id is possible
             var now = new Date();
             var droneDateTime = now.toISOString();
+            var locationID = shortid.generate(); // create an unique ID
+            var locationBuilding = "Zandpoortvest"
+            var locationBuildingRef = "buildings/BJ19uwZBe"
             dal.insertDrone(new Drone(drone.id, drone.name, drone.mac_address, drone.location, droneDateTime, droneDateTime));
+            dal.insertLocation(new Location(locationID, drone.location, locationBuilding, locationBuildingRef, droneDateTime, droneDateTime));
             //console.log('Drone | ID: '+drone.id+' Name: '+drone.name+' MAC: '+drone.mac_address+' Location: '+drone.location);
 
             // 4 - GET THE LIST OF FILES FOR EACH DRONE
             var filesHeaderSettings = new Settings("/files?drone_id.is=" + drone.id + "&format=json&date_loaded.greaterOrEqual=2016-12-27"); // filtered on a few days
             //var filesHeaderSettings = new Settings("/files?drone_id.is=" + fixedDroneID + "&format=json");
             request(filesHeaderSettings, function (error, response, fileheadersString) { // call 3: list all file headers for all drones
+                try{ //error start for fileHeaders
                 var fileHeaders = JSON.parse(fileheadersString);
                 //console.log(fileHeaders); // since this is a list of all files for a certain drone, fileHeaders.id is not possible
 
@@ -128,9 +148,31 @@ request(dronesSettings, function (error, response, dronesString) { // call 1: Li
                                 request(contentSettings, function(error, response, contentString) {
                                     try { //error start for contents
                                     var content = JSON.parse(contentString);
-                                    //console.log('id: '+content.id+' RSSI: '+content.rssi);
-                                    dal.insertContent(new Content(content.id, content.mac_address, content.datetime, content.rssi, content.ref));
-                                    console.log('Content | ID: '+content.id+' MAC: '+content.mac_address+' Date Loaded: '+content.datetime+' RSSI: '+content.rssi+' Ref.: '+content.ref);
+                                        // additional data
+                                        var contentType = "probe";
+                                        var contentSource = "drones/"+drone.id;
+                                        var contentLocationRef = "locations/"+locationID;
+                                        var contentBuilding = "Zandpoortvest";
+                                        var contentBuildingRef = "buildings/BJ19uwZBe";
+                                        var now = new Date();
+                                        var contentDateTime = now.toISOString();
+
+                                    dal.insertContent(new Content(
+                                        content.id,
+                                        contentType,
+                                        content.datetime,
+                                        contentSource,
+                                        drone.location,
+                                        contentLocationRef,
+                                        contentBuilding,
+                                        contentBuildingRef,
+                                        content.mac_address,
+                                        content.rssi,
+                                        contentDateTime,
+                                        contentDateTime,
+                                        content.ref
+                                        ));
+                                    //console.log('Content | type: '+contentType+' Source: '+contentSource+' loca: '+drone.location+' Build: '+contentBuilding+' Created: '+contentDateTime);
                                     } catch (error) {console.log(error);} // error catch for content details
                                 }); // end content details request
                             }); // end content header forEach
@@ -139,6 +181,7 @@ request(dronesSettings, function (error, response, dronesString) { // call 1: Li
                         } catch (error) {console.log(error);} // error catch for file details
                     }); // end file detail request
                 }); // end file headers forEach
+                } catch (error) {console.log(error);} // error catch for file headers
             }); // end file headers request
         }); // end drone details request
     }); // end drones forEach
