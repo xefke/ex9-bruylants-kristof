@@ -28,7 +28,6 @@ String.prototype.ucfirst = function() {
 // e.g.: brUYlaNTs as input would correctly be reformatted as Bruylants as demonstrated in the below console.log
 //console.log("brUYlaNTs".ucfirst()); // result = Bruylants
 
-
 //-------------------------------------------------------------------------------------------------------------------//
 // 01 // == DRONES == ////
 // construct to add new drone
